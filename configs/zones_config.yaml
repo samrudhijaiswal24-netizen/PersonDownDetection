@@ -1,0 +1,64 @@
+# Spatial Zones Configuration for Person Down Detection
+# Phase 3.2: Bed / Sofa vs Floor Disambiguation
+# Calibrated for MCFD dataset camera views (720x480 resolution)
+
+version: "1.0"
+description: "Camera-specific polygon definitions for distinguishing furniture resting from floor collapse"
+
+default_policy:
+  outside_zone_behavior: "UNKNOWN_ZONE"
+  overlap_behavior: "UNKNOWN_ZONE" # Ambiguous overlap treated as UNKNOWN_ZONE rather than declared safe or dangerous
+  reference_point_min_confidence: 0.30
+
+cameras:
+  cam1:
+    resolution: [720, 480]
+    description: "MCFD Corner Camera 1 (used in chute02, chute14, chute16, chute24)"
+    status: "VALIDATED"
+    zones:
+      - name: "sofa_zone"
+        type: "BED_SOFA_ZONE"
+        description: "Living room sofa area on the middle-right side"
+        polygon:
+          - [370, 230]
+          - [630, 230]
+          - [630, 450]
+          - [370, 450]
+
+      - name: "floor_zone"
+        type: "FLOOR_ZONE"
+        description: "Living room floor and fall mattress area on the central-left side"
+        polygon:
+          - [70, 50]
+          - [350, 50]
+          - [350, 400]
+          - [70, 400]
+
+  cam2:
+    resolution: [720, 480]
+    description: "MCFD Axial Camera 2 (used in chute14_cam2)"
+    status: "VALIDATED"
+    zones:
+      - name: "sofa_zone"
+        type: "BED_SOFA_ZONE"
+        description: "Living room sofa area along the right wall"
+        polygon:
+          - [590, 230]
+          - [715, 230]
+          - [715, 460]
+          - [590, 460]
+
+      - name: "floor_zone"
+        type: "FLOOR_ZONE"
+        description: "Living room central floor and mattress area"
+        polygon:
+          - [230, 220]
+          - [570, 220]
+          - [570, 450]
+          - [230, 450]
+
+  cam1_chute09:
+    resolution: [720, 480]
+    description: "MCFD chute09 camera view with table/chair occlusion"
+    status: "REQUIRES_MANUAL_REVIEW"
+    zones: []

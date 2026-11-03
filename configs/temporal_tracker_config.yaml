@@ -1,0 +1,23 @@
+# Temporal State Tracker Configuration for Person Down Detection
+# Phase 4: State Tracking, Persistence & False-Alarm Suppression
+# Grounded in MCFD Technical Report 1350 real-world capture rate (30 FPS)
+
+version: "1.0"
+description: "Configurable persistence windows, state-memory grace periods, and state transition thresholds"
+
+timebase:
+  nominal_fps: 30.0                  # Real-world video capture rate (Technical Report 1350)
+  use_container_fps: false           # Do NOT assume 120.0 FPS container header represents physical timebase
+
+persistence:
+  persistence_seconds: 1.5           # Time required in floor zone before promotion to PERSON_DOWN_CANDIDATE
+  min_evidence_ratio: 0.65           # Fraction of floor-lying evidence required within the rolling window
+
+state_memory:
+  max_dropout_grace_seconds: 0.5     # Grace window bridging brief detector dropouts (15 frames @ 30 FPS)
+  max_disappearance_seconds: 1.5     # Beyond this gap, state transitions to UNKNOWN rather than asserting person is down
+
+recovery:
+  reset_on_upright_posture: true     # Immediate reset to NORMAL if STANDING or SITTING is reliably observed
+  reset_on_safe_furniture: true      # Immediate reset to NORMAL if person enters BED_SOFA_ZONE
+  upright_recovery_confirmation_frames: 1  # Consecutive upright frames to confirm recovery (1 = baseline instant reset)

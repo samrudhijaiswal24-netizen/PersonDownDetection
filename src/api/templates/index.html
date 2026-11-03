@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Person Down Detection System — Healthcare and Surveillance Computer Vision Platform for automated fall and floor-collapse monitoring.">
+  <title>Person Down Detection Platform | Surveillance & Fall Analytics</title>
+  
+  <!-- Anti-FOUC & Global Reset Stylesheet -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background-color: #070d19;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    a, a:visited, a:hover, a:active {
+      text-decoration: none !important;
+      color: inherit;
+    }
+  </style>
+
+  <link rel="stylesheet" href="/static/style.css?v=7.2.2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- Persistent Desktop Sidebar Navigation -->
+    <aside id="sidebar" class="app-sidebar" aria-label="Main Navigation">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <span class="brand-icon">🚨</span>
+          <div class="brand-text">
+            <span class="brand-title">PERSON DOWN</span>
+            <span class="brand-tag">VISION PLATFORM</span>
+          </div>
+        </div>
+        <button id="sidebarCloseBtn" class="sidebar-close-btn" aria-label="Close Sidebar">&times;</button>
+      </div>
+
+      <nav class="sidebar-nav" role="navigation">
+        <a href="#overview" class="nav-item active" data-page="overview">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Overview Dashboard</span>
+        </a>
+        <a href="#monitoring" class="nav-item" data-page="monitoring">
+          <span class="nav-icon">📹</span>
+          <span class="nav-label">Video Monitoring</span>
+        </a>
+        <a href="#dataset" class="nav-item" data-page="dataset">
+          <span class="nav-icon">📁</span>
+          <span class="nav-label">Dataset Explorer</span>
+        </a>
+        <a href="#alerts" class="nav-item" data-page="alerts">
+          <span class="nav-icon">🚨</span>
+          <span class="nav-label">Alerts & History</span>
+        </a>
+        <a href="#evaluation" class="nav-item" data-page="evaluation">
+          <span class="nav-icon">📈</span>
+          <span class="nav-label">Model Evaluation</span>
+        </a>
+        <a href="#zones" class="nav-item" data-page="zones">
+          <span class="nav-icon">📐</span>
+          <span class="nav-label">Spatial Zones</span>
+        </a>
+        <a href="#diagnostics" class="nav-item" data-page="diagnostics">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">System Diagnostics</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status-pill">
+          <span class="pulse-dot"></span>
+          <span id="sidebarStatusText">YOLO11-Pose • Active</span>
+        </div>
+        <div class="sidebar-version-text">Platform Version 7.2.1 • Multi-Page</div>
+      </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <div class="main-wrapper">
+
+      <!-- Top Application Header Area -->
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button id="sidebarToggleBtn" class="sidebar-toggle-btn" aria-label="Toggle Navigation Sidebar">
+            <span>☰</span>
+          </button>
+          <div class="topbar-identity">
+            <div class="topbar-breadcrumbs">
+              <span class="breadcrumb-root">🏥 Clinical AI Surveillance</span>
+              <span class="breadcrumb-separator">/</span>
+              <span id="breadcrumbActivePage" class="breadcrumb-current">Overview</span>
+            </div>
+            <div class="topbar-identity-title">Person Down Detection & Patient Safety Console</div>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div id="systemStatusBadge" class="badge-pill status-online">
+            <span class="pulse-dot"></span> System Online
+          </div>
+          <div id="hardwareBadge" class="badge-pill hardware-badge">
+            GPU: Initializing...
+          </div>
+          <div class="badge-pill session-badge">
+            <span id="activeJobsCountBadge">0 Active Jobs</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Global Error / Notice Banner -->
+      <div id="errorAlert" class="error-banner hidden" role="alert">
+        <div class="error-banner-content">
+          <span class="error-banner-icon">❌</span>
+          <span id="errorMessageText">An unexpected error occurred.</span>
+        </div>
+        <button id="btnDismissError" class="btn-close" aria-label="Dismiss message">&times;</button>
+      </div>
+
+      <!-- PAGE 1: OVERVIEW DASHBOARD -->
+      <main id="page-overview" class="page-content active">
+        <!-- Page Header & Subtext -->
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-main-title">Overview Dashboard</h1>
+            <p class="page-main-desc">High-level operational metrics, discovered dataset inventory, recent video processing jobs, and confirmed candidate alerts.</p>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn-primary btn-sm" onclick="navigateToPage('monitoring')">
+              <span>▶</span> Open Video Monitor
+            </button>
+          </div>
+        </div>
+
+        <!-- Compact System Status Strip -->
+        <div class="system-status-strip">
+          <div class="status-strip-item">
+            <span class="strip-label">Detector:</span>
+            <strong class="strip-val">YOLO11-Pose Nano (17 COCO Keypoints)</strong>
+          </div>
+          <div class="status-strip-divider"></div>
+          <div class="status-strip-item">
+            <span class="strip-label">Mode:</span>
+            <strong class="strip-val text-green">Autonomous Floor Collapse Monitoring</strong>
+          </div>
+          <div class="status-strip-divider"></div>
+          <div class="status-strip-item">
+            <span class="strip-label">Persistence Rule:</span>
+            <strong class="strip-val">1.5s (45f) @ &ge; 65% Floor Evidence</strong>
+          </div>
+          <div class="status-strip-divider"></div>
+          <div class="status-strip-item">
+            <span class="strip-label">Resolution Scaling:</span>
+            <strong class="strip-val text-cyan">Active & Verified</strong>
+          </div>
+        </div>
+
+        <!-- Research Prototype Disclaimer Notice -->
+        <aside class="disclaimer-banner" role="alert">
+          <span class="disclaimer-icon">⚠️</span>
+          <div class="disclaimer-body">
+            <strong>Research Prototype Notice:</strong> This platform is an experimental computer-vision monitoring system (YOLO11-Pose + Spatial Zones + Temporal State Tracking).
+            It is not a certified medical device or emergency alert system. Detections represent algorithmically generated candidate events requiring visual review.
+          </div>
+        </aside>
+
+        <!-- KPI Metric Cards Grid (Side-by-side on desktop, 4 columns, consistent height) -->
+        <div class="kpi-grid">
+          <div class="kpi-card" onclick="navigateToPage('dataset')">
+            <div class="kpi-header">
+              <span class="kpi-title">Discovered Videos</span>
+              <span class="kpi-icon">📁</span>
+            </div>
+            <div id="kpiDatasetCount" class="kpi-value">10</div>
+            <div class="kpi-subtext">Across samples, uploads & raw <span class="kpi-link">View dataset &rarr;</span></div>
+          </div>
+
+          <div class="kpi-card" onclick="navigateToPage('monitoring')">
+            <div class="kpi-header">
+              <span class="kpi-title">Videos Processed</span>
+              <span class="kpi-icon">▶</span>
+            </div>
+            <div id="kpiSessionJobs" class="kpi-value">0</div>
+            <div class="kpi-subtext">Videos processed this session <span class="kpi-link">Open monitor &rarr;</span></div>
+          </div>
+
+          <div class="kpi-card" onclick="navigateToPage('alerts')">
+            <div class="kpi-header">
+              <span class="kpi-title">Candidate Events</span>
+              <span class="kpi-icon">🚨</span>
+            </div>
+            <div id="kpiCandidateEvents" class="kpi-value">2</div>
+            <div class="kpi-subtext">Verified candidate collapses <span class="kpi-link">View history &rarr;</span></div>
+          </div>
+
+          <div class="kpi-card" onclick="navigateToPage('evaluation')">
+            <div class="kpi-header">
+              <span class="kpi-title">Benchmark Precision</span>
+              <span class="kpi-icon">🎯</span>
+            </div>
+            <div id="kpiBenchmarkPrecision" class="kpi-value">100%</div>
+            <div class="kpi-subtext">0 false alarms on 3,676 ADL frames <span class="kpi-link">View evaluation &rarr;</span></div>
+          </div>
+        </div>
+
+        <!-- Official Benchmark Callout Card -->
+        <div class="glass-card benchmark-callout-card">
+          <div class="benchmark-callout-content">
+            <div class="benchmark-callout-badge">OFFICIAL BENCHMARK RESULTS (PHASE 6)</div>
+            <h2 class="benchmark-callout-title">MCFD Fall Detection Recall & Reliability Summary</h2>
+            <p class="benchmark-callout-desc">
+              Deterministic temporal persistence (1.5s, 65% floor evidence, 0.5s grace) evaluated across 8,726 benchmark frames.
+              Foreshortened 2D lying geometry recovered Chute 14 Camera 1 fall detection with 2.97s latency and 0 false alarms on 3,676 negative control frames.
+            </p>
+            <div class="benchmark-pill-row">
+              <div class="stat-pill"><span class="stat-pill-label">Event Recall</span><span class="stat-pill-val" id="ovRecall">50.0%</span></div>
+              <div class="stat-pill"><span class="stat-pill-label">Event Precision</span><span class="stat-pill-val" id="ovPrec">100.0%</span></div>
+              <div class="stat-pill"><span class="stat-pill-label">Event F1-Score</span><span class="stat-pill-val" id="ovF1">0.6667</span></div>
+              <div class="stat-pill"><span class="stat-pill-label">Mean Alert Delay</span><span class="stat-pill-val" id="ovLatency">2.55s</span></div>
+              <div class="stat-pill"><span class="stat-pill-label">Negative Control False Alarms</span><span class="stat-pill-val text-green">0</span></div>
+            </div>
+          </div>
+          <button class="btn-secondary" onclick="navigateToPage('evaluation')">
+            <span>📈</span> Inspect Benchmark Details
+          </button>
+        </div>
+
+        <!-- Balanced Activity Panels Grid -->
+        <div class="dashboard-two-col">
+          <!-- Recent Video Processing Jobs -->
+          <div class="glass-card">
+            <div class="card-header-flex">
+              <div>
+                <h2 class="card-title">Recent Video Processing Jobs</h2>
+                <div class="card-subtitle">Active and completed execution jobs in the current session</div>
+              </div>
+              <button class="btn-sm btn-secondary" onclick="navigateToPage('monitoring')">Process Video</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Video File</th>
+                    <th>Camera</th>
+                    <th>Status</th>
+                    <th>Progress</th>
+                    <th>Events</th>
+                  </tr>
+                </thead>
+                <tbody id="overviewJobsBody">
+                  <tr><td colspan="5" class="table-empty-msg">No processing jobs queued in this session yet. Click 'Process Video' to analyze a clip.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Recent Candidate Events -->
+          <div class="glass-card">
+            <div class="card-header-flex">
+              <div>
+                <h2 class="card-title">Recent Candidate Events</h2>
+                <div class="card-subtitle">Latest floor collapse candidate events requiring verification</div>
+              </div>
+              <button class="btn-sm btn-secondary" onclick="navigateToPage('alerts')">View All</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Event ID</th>
+                    <th>Source Video</th>
+                    <th>Time</th>
+                    <th>Posture</th>
+                    <th>Zone</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="overviewEventsBody">
+                  <tr><td colspan="6" class="table-empty-msg">Loading candidate events...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- PAGE 2: VIDEO MONITORING -->
+      <main id="page-monitoring" class="page-content">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-main-title">Video Monitoring & Detection Console</h1>
+            <p class="page-main-desc">Video-first analytics console with real-time pose estimation, spatial zone HUD, and temporal tracking.</p>
+          </div>
+        </div>
+
+        <!-- Live HUD State Banner -->
+        <div id="statusBanner" class="status-banner state-normal">
+          <div class="status-main">
+            <div id="statusIcon" class="status-icon-badge">🛡️</div>
+            <div>
+              <div id="statusHeadline" class="status-headline">NORMAL ACTIVITY DETECTED</div>
+              <div id="statusSubtext" class="status-subtext">Select or upload a video and click 'Start Detection Pipeline' to begin monitoring.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Telemetry Micro-Cards -->
+        <div class="telemetry-grid">
+          <div class="telem-card">
+            <div class="telem-label">Temporal State</div>
+            <div id="telemState" class="telem-value">NORMAL</div>
+          </div>
+          <div class="telem-card">
+            <div class="telem-label">Subject Posture</div>
+            <div id="telemPosture" class="telem-value">NO_DETECTION</div>
+          </div>
+          <div class="telem-card">
+            <div class="telem-label">Spatial Zone</div>
+            <div id="telemZone" class="telem-value">OUTSIDE</div>
+          </div>
+          <div class="telem-card">
+            <div class="telem-label">Floor Down Timer</div>
+            <div id="telemTimer" class="telem-value">0.0s</div>
+          </div>
+        </div>
+
+        <!-- Video Player and Controls Grid -->
+        <div class="monitoring-grid">
+          <!-- Video Player Column -->
+          <div class="glass-card player-card">
+            <div class="card-header-flex">
+              <div>
+                <h2 class="card-title">🎥 Video Monitoring & AI Stream</h2>
+                <div class="video-meta-sub">
+                  <span id="videoModeBadge" class="badge badge-info">Awaiting Video</span>
+                  <span id="videoFilenameDisplay" class="video-filename-pill">Select a clip to begin</span>
+                </div>
+              </div>
+              <div class="header-action-group">
+                <!-- Video Mode Switcher Pills -->
+                <div id="videoSourceSwitcher" class="mode-toggle-group hidden">
+                  <button id="btnViewSource" class="toggle-pill active" type="button" title="View original source recording">Original Video</button>
+                  <button id="btnViewAnnotated" class="toggle-pill" type="button" title="View YOLO11-Pose annotated detection stream">Annotated Output</button>
+                </div>
+                <!-- Pre-existing Benchmark Load Button -->
+                <button id="btnLoadBenchmark" class="btn-sm btn-primary hidden" type="button" title="Load pre-analyzed benchmark result instantly without re-running pipeline">
+                  <span>⚡</span> Load Annotated Video
+                </button>
+                <!-- Download buttons -->
+                <div id="videoDownloadGroup" class="hidden download-btn-group">
+                  <a id="btnDownloadVideo" class="btn-sm btn-secondary" href="#" download>
+                    <span>⬇</span> Video (.mp4)
+                  </a>
+                  <button id="btnDownloadJson" class="btn-sm btn-secondary" type="button">
+                    <span>📄</span> Report (.json)
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Video Player Stage -->
+            <div class="video-player-wrapper" id="videoPlayerWrapper">
+              <!-- HTML5 Video Element -->
+              <video id="videoPlayer" class="video-element hidden" controls playsinline preload="auto"></video>
+
+              <!-- Live Processing HUD Overlay (Visible during active inference) -->
+              <div id="videoProcessingOverlay" class="video-processing-overlay hidden">
+                <div class="processing-spinner-ring"></div>
+                <div class="processing-title">Running YOLO11-Pose Detection Pipeline</div>
+                <div id="processingSubtext" class="processing-subtext">Extracting 17 pose keypoints & classifying spatial zones...</div>
+                <div class="processing-hud-box">
+                  <div class="hud-item"><span class="hud-lbl">Frame:</span> <span id="hudFrame" class="hud-val">0 / 0</span></div>
+                  <div class="hud-item"><span class="hud-lbl">Speed:</span> <span id="hudFps" class="hud-val">0.0 FPS</span></div>
+                  <div class="hud-item"><span class="hud-lbl">State:</span> <span id="hudState" class="hud-val text-green">NORMAL</span></div>
+                </div>
+              </div>
+
+              <!-- Informative Placeholder (Visible only before any video is selected) -->
+              <div id="videoPlaceholder" class="video-placeholder">
+                <div class="video-placeholder-icon">📺</div>
+                <div id="placeholderTitle" class="video-placeholder-text">Select a video to begin monitoring</div>
+                <div id="placeholderSub" class="video-placeholder-sub">Choose any dataset sample or upload a clip from the controls to preview original footage or stream YOLO11-Pose annotated detections.</div>
+                <button id="btnQuickFloorFall" class="btn-sm btn-primary mt-3" type="button">
+                  <span>▶</span> Preview Floor Fall Sample Clip
+                </button>
+              </div>
+            </div>
+
+            <!-- Dedicated Player Playback Toolbar -->
+            <div class="player-toolbar">
+              <div class="toolbar-left">
+                <button id="btnSeekStart" class="btn-tool" type="button" title="Rewind to start">⏮ Start</button>
+                <button id="btnSeekBack5" class="btn-tool" type="button" title="Back 5 seconds">⏪ -5s</button>
+                <button id="btnPlayPause" class="btn-tool btn-tool-primary" type="button" title="Play / Pause">▶ Play</button>
+                <button id="btnSeekFwd5" class="btn-tool" type="button" title="Forward 5 seconds">⏩ +5s</button>
+                <button id="btnReplayVideo" class="btn-tool" type="button" title="Replay video from beginning without reprocessing">🔄 Replay</button>
+                <span id="videoTimeDisplay" class="toolbar-time">00:00.0 / 00:00.0</span>
+              </div>
+              <div class="toolbar-right">
+                <div class="speed-selector" title="Playback Speed">
+                  <span class="speed-label">Speed:</span>
+                  <button class="btn-speed" data-speed="0.5" type="button">0.5x</button>
+                  <button class="btn-speed active" data-speed="1.0" type="button">1x</button>
+                  <button class="btn-speed" data-speed="1.5" type="button">1.5x</button>
+                  <button class="btn-speed" data-speed="2.0" type="button">2x</button>
+                </div>
+                <button id="btnFullscreen" class="btn-tool" type="button" title="Toggle Fullscreen">⛶ Fullscreen</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls & Config Column -->
+          <div class="glass-card controls-card">
+            <h2 class="card-title">⚙️ Monitoring Controls</h2>
+
+            <!-- Video Source Selection Tabs -->
+            <div class="tab-group" role="tablist">
+              <button id="tabSample" class="tab-btn active" role="tab">Dataset / Samples</button>
+              <button id="tabUpload" class="tab-btn" role="tab">Upload Video</button>
+            </div>
+
+            <!-- Tab 1: Dataset / Sample Selector -->
+            <div id="sampleSection">
+              <div class="form-group">
+                <label for="sampleSelect" class="form-label">Select Video File:</label>
+                <select id="sampleSelect" class="form-select">
+                  <option value="">Loading videos...</option>
+                </select>
+                <p id="sampleHint" class="sample-meta-hint">Loading scenario details...</p>
+              </div>
+            </div>
+
+            <!-- Tab 2: Custom File Upload -->
+            <div id="uploadSection" class="hidden">
+              <div class="form-group">
+                <label class="form-label">Upload Video (.mp4, .avi, .mov, .mkv):</label>
+                <div id="dropzone" class="dropzone">
+                  <div class="dropzone-icon">📁</div>
+                  <div class="dropzone-text">Drag & drop video here, or click to browse</div>
+                  <div class="dropzone-subtext">Supports MP4, AVI, MOV up to 250 MB</div>
+                  <input type="file" id="fileInput" class="hidden" accept=".mp4,.avi,.mov,.mkv,.webm">
+                </div>
+                <div id="fileDetails" class="sample-meta-hint hidden text-cyan">
+                  Selected: <span id="fileNameDisplay"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Camera Spatial Zone Profile Selection -->
+            <div class="form-group">
+              <label for="cameraSelect" class="form-label">Camera Spatial Zone Profile:</label>
+              <select id="cameraSelect" class="form-select">
+                <option value="auto" selected>Auto-Detect from Video / Filename</option>
+                <option value="cam1">MCFD Camera 1 (Corner View - Bed/Sofa Right, Floor Center)</option>
+                <option value="cam2">MCFD Camera 2 (Axial View - Bed/Sofa Wall, Floor Center)</option>
+                <option value="cam1_chute09">MCFD Camera 1 (Chute 09 Uncalibrated Profile)</option>
+              </select>
+            </div>
+
+            <!-- Optional Max Frames Cap -->
+            <div class="form-group">
+              <label for="maxFramesInput" class="form-label">Frame Limit (Optional preview cap):</label>
+              <input type="number" id="maxFramesInput" class="form-input" placeholder="e.g. 150 (Leave blank for full video)" min="10" step="10">
+            </div>
+
+            <!-- Action Buttons -->
+            <button id="btnStart" class="btn-primary btn-block">
+              <span>▶</span> Start Detection Pipeline
+            </button>
+            <button id="btnCancel" class="btn-danger btn-block hidden">
+              <span>⏹</span> Cancel Processing
+            </button>
+            <button id="btnReset" class="btn-secondary btn-block hidden">
+              <span>🔄</span> Process Another Video
+            </button>
+
+            <!-- Progress Telemetry Card -->
+            <div id="progressCard" class="progress-card hidden">
+              <div class="flex-between">
+                <span class="form-label-bold">Processing Video...</span>
+                <span id="progressPercentText" class="text-cyan font-bold">0%</span>
+              </div>
+              <div class="progress-bar-container">
+                <div id="progressBarFill" class="progress-bar-fill"></div>
+              </div>
+              <div class="progress-stats-grid">
+                <div class="progress-stat-box">
+                  <div id="statCurrentFrame" class="progress-stat-val">0 / 0</div>
+                  <div class="progress-stat-lbl">Frames Analyzed</div>
+                </div>
+                <div class="progress-stat-box">
+                  <div id="statFps" class="progress-stat-val">0.0 FPS</div>
+                  <div class="progress-stat-lbl">Inference Speed</div>
+                </div>
+                <div class="progress-stat-box">
+                  <div class="progress-stat-val">1.5s</div>
+                  <div class="progress-stat-lbl">Persistence Threshold</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Candidate Event History Log for current video -->
+        <div class="glass-card" style="margin-top: 1.5rem;">
+          <h2 class="card-title">📋 Candidate Collapse Events (Duplicate-Free)</h2>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Event ID</th>
+                  <th>Trigger Time (Frame)</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                  <th>Peak Posture</th>
+                  <th>Zone</th>
+                  <th>Playback Action</th>
+                </tr>
+              </thead>
+              <tbody id="eventsTableBody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+            <div id="emptyEventsNotice" class="table-empty-msg">
+              No person-down candidate events detected yet. Monitoring active.
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Summary Card (Upon Completion) -->
+        <div id="summaryCard" class="glass-card hidden" style="margin-top: 1.5rem;">
+          <h2 class="card-title">📊 Video Analysis Summary</h2>
+          <div id="summaryGrid" class="summary-grid"></div>
+        </div>
+      </main>
+
+      <!-- PAGE 3: DATASET EXPLORER -->
+      <main id="page-dataset" class="page-content">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-main-title">Dataset Explorer</h1>
+            <p class="page-main-desc">Recursive repository video catalog across data/samples, data/uploads, and data/raw.</p>
+          </div>
+          <div class="page-header-actions">
+            <button id="btnRescanDataset" class="btn-secondary btn-sm">
+              <span>🔄</span> Rescan Dataset
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="dataset-top-bar">
+            <div>
+              <h2 class="card-title" style="margin:0;">Discovered Video Files Inventory</h2>
+              <p class="dataset-subtitle">Recursively indexing repository videos across <code>data/samples</code>, <code>data/uploads</code>, and <code>data/raw</code> (excluding outputs in <code>data/processed</code>).</p>
+            </div>
+          </div>
+
+          <!-- Filters Bar -->
+          <div class="filter-toolbar">
+            <div class="filter-group">
+              <label for="datasetSearch" class="form-label-sm">Search Filename / Description:</label>
+              <input type="text" id="datasetSearch" class="form-input" placeholder="e.g. chute14, fall, normal...">
+            </div>
+            <div class="filter-group">
+              <label for="datasetFolderFilter" class="form-label-sm">Folder:</label>
+              <select id="datasetFolderFilter" class="form-select">
+                <option value="">All Folders</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="datasetFormatFilter" class="form-label-sm">Format:</label>
+              <select id="datasetFormatFilter" class="form-select">
+                <option value="">All Formats</option>
+              </select>
+            </div>
+            <div class="filter-group filter-group-btn">
+              <button id="btnClearDatasetFilters" class="btn-secondary btn-sm">Clear Filters</button>
+            </div>
+          </div>
+
+          <!-- Dataset Table -->
+          <div class="table-responsive" style="margin-top: 1rem;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Filename & Description</th>
+                  <th>Folder</th>
+                  <th>Format</th>
+                  <th>Resolution</th>
+                  <th>FPS</th>
+                  <th>Frames</th>
+                  <th>Duration</th>
+                  <th>Size</th>
+                  <th>Recommended Cam</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="datasetTableBody">
+                <tr><td colspan="10" class="table-empty-msg">Loading dataset videos...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <!-- PAGE 4: ALERTS AND EVENT HISTORY -->
+      <main id="page-alerts" class="page-content">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-main-title">Alerts & Candidate Events Log</h1>
+            <p class="page-main-desc">Detailed record of candidate collapse events across processing jobs and benchmark evaluations.</p>
+          </div>
+          <div class="page-header-actions">
+            <a id="btnExportEventsCsv" href="/api/events/export/csv" class="btn-secondary btn-sm">
+              <span>📄</span> Export CSV
+            </a>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-title" style="margin:0;">🚨 Candidate Collapse Events Log</h2>
+              <p class="dataset-subtitle">Aggregated candidate events across active processing sessions and benchmark evaluations.</p>
+            </div>
+          </div>
+
+          <!-- Alerts Filter Toolbar -->
+          <div class="filter-toolbar">
+            <div class="filter-group">
+              <label for="alertsSearch" class="form-label-sm">Search Event / Video:</label>
+              <input type="text" id="alertsSearch" class="form-input" placeholder="e.g. cand_mcfd, floor_fall...">
+            </div>
+            <div class="filter-group">
+              <label for="alertsStatusFilter" class="form-label-sm">Status:</label>
+              <select id="alertsStatusFilter" class="form-select">
+                <option value="">All Statuses</option>
+                <option value="BENCHMARK_CONFIRMED">Benchmark Confirmed</option>
+                <option value="CANDIDATE_CONFIRMED">Candidate Confirmed</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="alertsZoneFilter" class="form-label-sm">Zone:</label>
+              <select id="alertsZoneFilter" class="form-select">
+                <option value="">All Zones</option>
+                <option value="floor_mat">floor_mat</option>
+                <option value="floor_zone">floor_zone</option>
+                <option value="bed_sofa_zone">bed_sofa_zone</option>
+                <option value="OUTSIDE">OUTSIDE</option>
+              </select>
+            </div>
+            <div class="filter-group filter-group-btn">
+              <button id="btnClearAlertsFilters" class="btn-secondary btn-sm">Clear Filters</button>
+            </div>
+          </div>
+
+          <!-- Events Table -->
+          <div class="table-responsive" style="margin-top: 1rem;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Event ID</th>
+                  <th>Source Video</th>
+                  <th>Camera</th>
+                  <th>Trigger Time (Frame)</th>
+                  <th>Duration</th>
+                  <th>Status</th>
+                  <th>Peak Posture</th>
+                  <th>Confidence</th>
+                  <th>Zone</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="allAlertsTableBody">
+                <tr><td colspan="10" class="table-empty-msg">Loading candidate events...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <!-- PAGE 5: MODEL EVALUATION AND REPORTS -->
+      <main id="page-evaluation" class="page-content">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-main-title">Model Evaluation & Benchmark Analysis</h1>
+            <p class="page-main-desc">Official Protocol A & B benchmarks, confusion matrices, and SHA-256 baseline verification.</p>
+          </div>
+        </div>
+
+        <!-- Benchmark Overview KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-title">Event-Level Recall</span><span class="kpi-icon">📈</span></div>
+            <div class="kpi-value text-green">50.0%</div>
+            <div class="kpi-subtext">2 of 4 falls detected (Chute 14 Cam 1 & Cam 2)</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-title">Event-Level Precision</span><span class="kpi-icon">🎯</span></div>
+            <div class="kpi-value text-cyan">100.0%</div>
+            <div class="kpi-subtext">0 false positive candidate events</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-title">Mean Alert Latency</span><span class="kpi-icon">⏱️</span></div>
+            <div class="kpi-value">2.55s</div>
+            <div class="kpi-subtext">Average time from fall onset to confirmation</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-title">ADL False Alarms</span><span class="kpi-icon">🛡️</span></div>
+            <div class="kpi-value text-green">0</div>
+            <div class="kpi-subtext">Across 3,676 negative control frames (Chute 24)</div>
+          </div>
+        </div>
+
+        <!-- Protocol Comparison Cards -->
+        <div class="dashboard-two-col" style="margin-top: 1.5rem;">
+          <div class="glass-card">
+            <div class="card-badge">STRICT BENCHMARK</div>
+            <h2 class="card-title">Protocol A (Technical Report 1350)</h2>
+            <p class="card-desc">Evaluated frame-by-frame against literal ground truth fall interval across all 8,726 benchmark frames.</p>
+            <div class="confusion-matrix-grid">
+              <div class="matrix-cell tp"><div class="matrix-val" id="protoATp">31</div><div class="matrix-lbl">True Positives</div></div>
+              <div class="matrix-cell fp"><div class="matrix-val" id="protoAFp">81</div><div class="matrix-lbl">False Positives</div></div>
+              <div class="matrix-cell fn"><div class="matrix-val" id="protoAFn">414</div><div class="matrix-lbl">False Negatives</div></div>
+              <div class="matrix-cell tn"><div class="matrix-val" id="protoATn">8200</div><div class="matrix-lbl">True Negatives</div></div>
+            </div>
+            <div class="metrics-row">
+              <div class="metric-item"><span>Precision:</span> <strong id="protoAPrec">27.68%</strong></div>
+              <div class="metric-item"><span>Recall:</span> <strong id="protoARec">6.97%</strong></div>
+              <div class="metric-item"><span>F1-Score:</span> <strong id="protoAF1">0.1114</strong></div>
+            </div>
+          </div>
+
+          <div class="glass-card">
+            <div class="card-badge">CONDITIONAL POST-EVENT TAIL</div>
+            <h2 class="card-title">Protocol B (Masked Post-Fall Tail)</h2>
+            <p class="card-desc">Masks 73 unannotated post-fall frames (Chute 14 Cam 2: 1123-1195) where subject remained motionless on the floor.</p>
+            <div class="confusion-matrix-grid">
+              <div class="matrix-cell tp"><div class="matrix-val" id="protoBTp">31</div><div class="matrix-lbl">True Positives</div></div>
+              <div class="matrix-cell fp"><div class="matrix-val" id="protoBFp">8</div><div class="matrix-lbl">False Positives</div></div>
+              <div class="matrix-cell fn"><div class="matrix-val" id="protoBFn">414</div><div class="matrix-lbl">False Negatives</div></div>
+              <div class="matrix-cell tn"><div class="matrix-val" id="protoBTn">8200</div><div class="matrix-lbl">True Negatives</div></div>
+            </div>
+            <div class="metrics-row">
+              <div class="metric-item"><span>Precision:</span> <strong id="protoBPrec">79.49%</strong></div>
+              <div class="metric-item"><span>Recall:</span> <strong id="protoBRec">6.97%</strong></div>
+              <div class="metric-item"><span>F1-Score:</span> <strong id="protoBF1">0.1282</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Per Video Breakdown Table -->
+        <div class="glass-card" style="margin-top: 1.5rem;">
+          <h2 class="card-title">Per-Video Benchmark Breakdown</h2>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Video Name</th>
+                  <th>Camera</th>
+                  <th>Total Frames</th>
+                  <th>Speed (FPS)</th>
+                  <th>Ground Truth</th>
+                  <th>Candidates</th>
+                  <th>TP / FP / FN</th>
+                  <th>Detection Delay</th>
+                  <th>Protocol A F1</th>
+                </tr>
+              </thead>
+              <tbody id="evalPerVideoTableBody">
+                <tr><td colspan="9" class="table-empty-msg">Loading per-video benchmark breakdown...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Root Cause Analysis Cards -->
+        <div class="glass-card" style="margin-top: 1.5rem;">
+          <h2 class="card-title">Verified Root Causes & System Limitations</h2>
+          <div class="diagnosis-grid">
+            <div class="diagnosis-card">
+              <div class="diagnosis-header">
+                <span class="diagnosis-title">mcfd_chute14_cam1.avi</span>
+                <span class="badge-pill status-online">RESOLVED (Phase 6)</span>
+              </div>
+              <p class="diagnosis-body">
+                <strong>Resolution:</strong> Foreshortened diagonal corner perspective previously caused a 55° 2D torso angle and bent knees, falsely boosting sitting (+0.35) over lying.
+                Adding foreshortened lying rules and unconditioned knee flexion suppression recovered detection at frame 1133 (delay: 2.97s).
+              </p>
+            </div>
+
+            <div class="diagnosis-card">
+              <div class="diagnosis-header">
+                <span class="diagnosis-title">mcfd_chute02_cam1.avi</span>
+                <span class="badge-pill hardware-badge">OCCLUSION CONSTRAINT</span>
+              </div>
+              <p class="diagnosis-body">
+                <strong>Hardware Limitation:</strong> In 198 of 201 ground-truth fall frames (98.5%), the subject fell completely behind high furniture, leaving zero visible body keypoints or bounding boxes.
+                Preserved honestly as camera occlusion constraint without synthetic fabrication.
+              </p>
+            </div>
+
+            <div class="diagnosis-card">
+              <div class="diagnosis-header">
+                <span class="diagnosis-title">mcfd_chute16_cam1.avi</span>
+                <span class="badge-pill hardware-badge">DETECTOR CONFIDENCE LIMIT</span>
+              </div>
+              <p class="diagnosis-body">
+                <strong>Model Limitation:</strong> Subject confidence during fall dropped to ~0.13 (below 0.50 threshold), while an office chair with coat was detected as an upright person (conf 0.801).
+                Preserved honestly to prevent lowering thresholds that would cause false alarms.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHA-256 Integrity Verification -->
+        <div class="glass-card" style="margin-top: 1.5rem;">
+          <h2 class="card-title">SHA-256 Baseline Preservation Verification</h2>
+          <p class="dataset-subtitle">Cryptographic validation verifying historical baseline reports and prediction matrices remain bit-for-bit intact.</p>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Baseline File</th>
+                  <th>SHA-256 Checksum</th>
+                  <th>Integrity Status</th>
+                </tr>
+              </thead>
+              <tbody id="baselineHashesTableBody">
+                <tr><td colspan="3" class="table-empty-msg">Loading baseline checksums...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Available Benchmark Reports Download -->
+        <div class="glass-card" style="margin-top: 1.5rem;">
+          <h2 class="card-title">Available Evaluation Reports (JSON)</h2>
+          <div id="reportsListGrid" class="reports-list-grid">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </main>
+
+      <!-- PAGE 6: CAMERA AND SPATIAL ZONE SETTINGS -->
+      <main id="page-zones" class="page-content">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-main-title">Camera & Spatial Zone Settings</h1>
+            <p class="page-main-desc">Camera calibration profiles, polygon coordinates, and resolution-aware scaling verification.</p>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div class="card-header-flex">
+            <div>
+              <h2 class="card-title" style="margin:0;">Camera Spatial Zone Configurations</h2>
+              <p class="dataset-subtitle">Camera calibration profiles, polygon coordinates, and resolution-aware scaling verification.</p>
+            </div>
+            <div class="camera-btn-group">
+              <button class="btn-sm btn-secondary cam-btn active" data-cam="cam1">Camera 1 (Corner)</button>
+              <button class="btn-sm btn-secondary cam-btn" data-cam="cam2">Camera 2 (Axial)</button>
+              <button class="btn-sm btn-secondary cam-btn" data-cam="cam1_chute09">Chute 09 (Review)</button>
+            </div>
+          </div>
+
+          <div class="zones-main-layout">
+            <!-- Left: Visual Calibration Preview -->
+            <div class="zone-preview-pane">
+              <div class="preview-img-wrapper">
+                <img id="zonePreviewImg" src="/api/zones/preview/cam1" alt="Zone Calibration Preview" class="zone-preview-img">
+              </div>
+              <div class="preview-meta-row">
+                <span id="zoneCameraStatus" class="badge-pill status-online">Status: VALIDATED</span>
+                <span id="zoneCameraRes" class="badge-pill hardware-badge">Calibrated Resolution: 720 x 480</span>
+              </div>
+            </div>
+
+            <!-- Right: Configured Polygons & Details -->
+            <div class="zone-details-pane">
+              <h3 class="zone-pane-title">Configured Spatial Zones</h3>
+              <div id="zonesListContainer" class="zones-list-container">
+                <!-- Populated dynamically -->
+              </div>
+
+              <!-- Interactive Scaling Calculator -->
+              <div class="scaling-calc-box">
+                <h4 class="calc-title">📐 Resolution Scaling Calculator</h4>
+                <p class="calc-desc">Tests coordinate mapping from arbitrary video resolutions into calibrated zone space.</p>
+                <div class="calc-form-row">
+                  <div>
+                    <label class="form-label-sm">Frame Size (W x H):</label>
+                    <input type="text" id="calcFrameSize" class="form-input" value="1200 x 896">
+                  </div>
+                  <div>
+                    <label class="form-label-sm">Point (X, Y):</label>
+                    <input type="text" id="calcPoint" class="form-input" value="600, 750">
+                  </div>
+                  <div>
+                    <button id="btnRunScalingCalc" class="btn-primary btn-sm" style="margin-top: 1.4rem;">Calculate</button>
+                  </div>
+                </div>
+                <div id="calcResultDisplay" class="calc-result hidden">
+                  Mapped Point in Calibrated Space: <strong id="calcMappedResult"></strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Safe Resting Policy Card -->
+          <div class="safe-policy-card">
+            <h3 class="safe-policy-title">🏥 Safe Resting Policy & Collapse Detection Logic</h3>
+            <div class="safe-policy-grid">
+              <div class="safe-policy-col">
+                <span class="safe-badge green">SAFE RESTING (BED / SOFA)</span>
+                <p>When a person lies down in <code>bed_sofa_zone</code>, the system classifies the state as <code>BED_SOFA_LYING</code>. The floor timer remains at 0.0s and no alerts are triggered.</p>
+              </div>
+              <div class="safe-policy-col">
+                <span class="safe-badge red">COLLAPSE CANDIDATE (FLOOR ZONE)</span>
+                <p>When a person lies down in <code>floor_zone</code> or <code>floor_mat</code>, the system accumulates the floor down timer. If evidence ratio &ge; 65% over 1.5s, a candidate event is confirmed.</p>
+              </div>
+              <div class="safe-policy-col">
+                <span class="safe-badge cyan">UPRIGHT RECOVERY (N=1)</span>
+                <p>If the subject stands up or sits upright, a single frame confirmation immediately resets the candidate timer, preventing spurious continuation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- PAGE 7: SYSTEM DIAGNOSTICS -->
+      <main id="page-diagnostics" class="page-content">
+        <div class="page-header-row">
+          <div>
+            <h1 class="page-main-title">System Status & Diagnostics</h1>
+            <p class="page-main-desc">Hardware runtime telemetry, PyTorch CUDA details, directory permissions, and live server logs.</p>
+          </div>
+          <div class="page-header-actions">
+            <button id="btnRefreshLogs" class="btn-secondary btn-sm">
+              <span>🔄</span> Refresh Logs
+            </button>
+          </div>
+        </div>
+
+        <div class="dashboard-two-col">
+          <!-- Diagnostics Left: System Health -->
+          <div class="glass-card">
+            <div class="card-header-flex">
+              <h2 class="card-title" style="margin:0;">Hardware & Runtime Environment</h2>
+              <span id="diagStatusBadge" class="badge-pill status-online">Status: ONLINE</span>
+            </div>
+
+            <div class="diag-props-list">
+              <div class="diag-prop-row"><span class="diag-prop-label">Python Version:</span><strong id="diagPython" class="diag-prop-val">--</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">PyTorch Version:</span><strong id="diagTorch" class="diag-prop-val">--</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">CUDA Available:</span><strong id="diagCuda" class="diag-prop-val">--</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">GPU Device Name:</span><strong id="diagGpu" class="diag-prop-val">--</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">Server Uptime:</span><strong id="diagUptime" class="diag-prop-val">--</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">Active Worker Threads:</span><strong id="diagWorkers" class="diag-prop-val">--</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">In-Memory Job Store:</span><strong id="diagJobCount" class="diag-prop-val">--</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">Resolution-Scaling Engine:</span><strong id="diagScaling" class="diag-prop-val text-green">PASS (Verified)</strong></div>
+            </div>
+
+            <h3 class="card-subtitle" style="margin-top: 1.5rem;">Pipeline Configuration Parameters</h3>
+            <div class="diag-props-list">
+              <div class="diag-prop-row"><span class="diag-prop-label">Model Name:</span><strong class="diag-prop-val">yolo11n-pose.pt</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">Persistence Threshold:</span><strong class="diag-prop-val">1.5 seconds (45 frames)</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">Minimum Evidence Ratio:</span><strong class="diag-prop-val">65% (0.65)</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">Dropout Grace Period:</span><strong class="diag-prop-val">0.5 seconds (15 frames)</strong></div>
+              <div class="diag-prop-row"><span class="diag-prop-label">Upright Recovery Confirmation:</span><strong class="diag-prop-val">1 frame</strong></div>
+            </div>
+          </div>
+
+          <!-- Diagnostics Right: Directories & Logs -->
+          <div class="glass-card">
+            <h2 class="card-title">Storage & Directory Permissions</h2>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Directory</th>
+                    <th>Path</th>
+                    <th>Exists</th>
+                    <th>Writable</th>
+                  </tr>
+                </thead>
+                <tbody id="diagDirsTableBody">
+                  <tr><td colspan="4" class="table-empty-msg">Checking directory status...</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card-header-flex" style="margin-top: 1.5rem;">
+              <h2 class="card-title" style="margin:0;">Live Application Logs</h2>
+            </div>
+            <div id="liveLogsContainer" class="live-logs-container">
+              <div class="log-line">[00:00:00] [INFO] Loading application logs...</div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Detail Modal Dialog -->
+  <div id="detailModal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <h3 id="modalTitle" class="modal-title">Item Details</h3>
+        <button id="modalCloseBtn" class="btn-close" aria-label="Close dialog">&times;</button>
+      </div>
+      <div id="modalBody" class="modal-body">
+        <!-- Dynamic content -->
+      </div>
+      <div class="modal-footer">
+        <button id="modalActionBtn" class="btn-primary btn-sm hidden">Action</button>
+        <button id="modalDismissBtn" class="btn-secondary btn-sm">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js?v=7.2.2"></script>
+</body>
+</html>

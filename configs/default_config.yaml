@@ -1,0 +1,29 @@
+# Person Down Detection System Configuration
+system:
+  device: "cuda"            # "cuda" or "cpu"
+  random_seed: 42
+  log_level: "INFO"
+
+pose:
+  model_name: "yolo11n-pose.pt"
+  confidence_threshold: 0.5
+  iou_threshold: 0.45
+
+posture:
+  classes:
+    - STANDING
+    - SITTING
+    - LYING
+    - UNKNOWN
+
+alert:
+  persistence_seconds: 2.5
+  fps: 30
+  required_consecutive_frames: 75
+  target_posture: "LYING"
+  danger_zone: "FLOOR"
+
+video:
+  output_format: "mp4v"
+  display_skeletons: true
+  display_zones: true

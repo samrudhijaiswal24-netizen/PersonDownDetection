@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Video Playback Diagnosis</title>
+</head>
+<body>
+  <h1>Video Playback Test</h1>
+  <div>
+    <h3>1. Existing MP4 (Encoded with mp4v):</h3>
+    <video id="v1" controls width="400" playsinline src="/api/videos/annotated_job_20261027_110227_68b6b4_mcfd_chute14_cam1.mp4"></video>
+    <div id="v1_status">Testing...</div>
+  </div>
+
+  <div>
+    <h3>2. H.264 MP4 (Encoded with avc1):</h3>
+    <video id="v2" controls width="400" playsinline src="/api/videos/test_avc1_720x480.mp4"></video>
+    <div id="v2_status">Testing...</div>
+  </div>
+
+  <script>
+    window.testResults = {};
+
+    function monitor(id, statusId) {
+      const v = document.getElementById(id);
+      const s = document.getElementById(statusId);
+      window.testResults[id] = { loadedmetadata: false, error: null, readyState: 0, networkState: 0 };
+
+      v.addEventListener("loadedmetadata", () => {
+        window.testResults[id].loadedmetadata = true;
+        window.testResults[id].videoWidth = v.videoWidth;
+        window.testResults[id].videoHeight = v.videoHeight;
+        window.testResults[id].duration = v.duration;
+        s.textContent = `SUCCESS: metadata loaded (${v.videoWidth}x${v.videoHeight}, ${v.duration}s)`;
+        v.play().then(() => {
+          window.testResults[id].played = true;
+        }).catch(err => {
+          window.testResults[id].playError = err.message;
+        });
+      });
+
+      v.addEventListener("error", (e) => {
+        const err = v.error;
+        window.testResults[id].error = {
+          code: err ? err.code : 'unknown',
+          message: err ? err.message : 'unknown'
+        };
+        s.textContent = `FAILED: error code ${err ? err.code : 'unknown'} (${err ? err.message : ''})`;
+      });
+
+      setTimeout(() => {
+        window.testResults[id].readyState = v.readyState;
+        window.testResults[id].networkState = v.networkState;
+        window.testResults[id].paused = v.paused;
+      }, 1500);
+    }
+
+    monitor("v1", "v1_status");
+    monitor("v2", "v2_status");
+  </script>
+</body>
+</html>
